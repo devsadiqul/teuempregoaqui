@@ -3,7 +3,6 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-
 from apps.candidate import resolutions, services
 from apps.candidate.serializers import HowToSolveRequestSerializer
 from apps.candidate.response_schemas import HowToSolveReportSchema
@@ -37,12 +36,15 @@ def how_to_solve(request):
             return Response({"detail": "Target occupation not found."},
                             status=status.HTTP_404_NOT_FOUND)
         result = services.run_match(profile, occupation, d, lang=lang)
-        country = (d.get("target_country") or profile.target_country or "ES").upper()
+        profile_country_code = profile.target_country.country_code if profile.target_country else None
+        country = (d.get("target_country") or profile_country_code or "ES").upper()
         current = result["total"]
         cards = [resolutions.resolve(a["gap_type"], country, a.get("context", {}),
                                      current, a["gain"], lang=lang)
                  for a in result["evolution"]["actions"]]
-        cards.sort(key=lambda c: c["expected_impact_points"], reverse=True)
+        # Mandatory eligibility gaps (priority_level 5, gain 0) sort first -
+        # they block the vacancy outright, regardless of score impact.
+        cards.sort(key=lambda c: (c["priority_level"], c["expected_impact_points"]), reverse=True)
         return Response({
             "total": current, "classification": result["classification"],
             "potential": result["evolution"]["potential"],

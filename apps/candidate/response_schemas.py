@@ -5,6 +5,7 @@ class EvolutionActionSchema(serializers.Serializer):
     gap_type = serializers.CharField()
     action = serializers.CharField()
     gain = serializers.FloatField()
+    evidence_status = serializers.CharField(required=False)
     detail = serializers.ListField(child=serializers.CharField(), required=False)
     context = serializers.DictField(required=False)
 
@@ -16,25 +17,72 @@ class EvolutionSchema(serializers.Serializer):
     actions = EvolutionActionSchema(many=True)
 
 
+class RecognitionRequirementSchema(serializers.Serializer):
+    status = serializers.CharField()
+    competent_authority = serializers.CharField(allow_blank=True)
+    official_source_url = serializers.CharField(allow_blank=True)
+    evidence_status = serializers.CharField()
+
+
 class MatchTargetSchema(serializers.Serializer):
     esco_uuid = serializers.CharField()
     code = serializers.CharField()
     label = serializers.CharField()
     essential_skill_count = serializers.IntegerField()
+    regulated = serializers.BooleanField()
+    recognition_requirement = RecognitionRequirementSchema(allow_null=True)
+
+
+class DimensionSchema(serializers.Serializer):
+    """One auditable sub-score. status is one of: verified,
+    declared_unverified, missing, not_compliant, not_applicable - see
+    apps.candidate.scoring.Evidence."""
+    score = serializers.FloatField()
+    weight = serializers.FloatField()
+    status = serializers.CharField()
+    note = serializers.CharField(allow_blank=True)
+
+
+class EligibilitySchema(serializers.Serializer):
+    eligible = serializers.BooleanField()
+    reason = serializers.CharField(allow_null=True)
+    requirement = serializers.CharField(allow_null=True)
+    evidence_status = serializers.CharField(allow_null=True)
+
+
+class JobMatchScoreSchema(serializers.Serializer):
+    total = serializers.FloatField()
+    confidence = serializers.FloatField()
+    classification = serializers.CharField()
+    eligibility = EligibilitySchema()
+    dimensions = serializers.DictField(child=DimensionSchema())
+    matched_skills = serializers.ListField(child=serializers.CharField())
+    missing_skills = serializers.ListField(child=serializers.CharField())
+
+
+class EmployabilityIndexSchema(serializers.Serializer):
+    total = serializers.FloatField()
+    confidence = serializers.FloatField()
+    classification = serializers.CharField()
+    dimensions = serializers.DictField(child=DimensionSchema())
 
 
 class BlocksSchema(serializers.Serializer):
-    experience = serializers.FloatField()
-    education = serializers.FloatField()
+    """Deprecated legacy mirror of job_match_score.dimensions[*].score,
+    kept only while frontend consumers migrate."""
+    esco_occupational_match = serializers.FloatField()
     skills = serializers.FloatField()
+    experience = serializers.FloatField()
     languages = serializers.FloatField()
-    immigration = serializers.FloatField()
-    documentation = serializers.FloatField()
+    location = serializers.FloatField()
+    recognition = serializers.FloatField()
 
 
 class MatchResponseSchema(serializers.Serializer):
+    job_match_score = JobMatchScoreSchema()
+    employability_index = EmployabilityIndexSchema()
+    # Legacy-compatible fields (deprecated - use job_match_score instead)
     blocks = BlocksSchema()
-    weights = serializers.DictField(child=serializers.FloatField())
     total = serializers.FloatField()
     classification = serializers.CharField()
     matched_skills = serializers.ListField(child=serializers.CharField())

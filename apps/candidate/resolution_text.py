@@ -180,6 +180,102 @@ TEXT = {
             "goal": "Obter o reconhecimento oficial do seu diploma",
         },
     },
+    "location": {
+        "en": {
+            "title": "Clarify your location / relocation preferences",
+            "explanation": ("This vacancy is tied to a specific location and your profile does "
+                            "not yet state a location preference or relocation willingness, so "
+                            "the system cannot evidence a geographic match either way."),
+            "recommended_actions": [
+                "Set a preferred location or maximum commute in your profile",
+                "Indicate whether you are willing to relocate within the target country",
+                "Indicate whether you are open to fully remote roles, if applicable",
+            ],
+            "estimated_timeline": "A few minutes (profile update)",
+            "estimated_cost": "Free",
+            "goal": "Declare a location preference or relocation willingness",
+        },
+        "es": {
+            "title": "Aclarar tus preferencias de ubicacion / traslado",
+            "explanation": ("Esta vacante esta vinculada a una ubicacion concreta y tu perfil "
+                            "aun no indica una preferencia de ubicacion ni disposicion a "
+                            "trasladarte, por lo que el sistema no puede evidenciar una "
+                            "coincidencia geografica en ningun sentido."),
+            "recommended_actions": [
+                "Define una ubicacion preferida o un tiempo maximo de desplazamiento en tu perfil",
+                "Indica si estas dispuesto/a a trasladarte dentro del pais de destino",
+                "Indica si aceptarias puestos totalmente remotos, si aplica",
+            ],
+            "estimated_timeline": "Unos minutos (actualizacion del perfil)",
+            "estimated_cost": "Gratis",
+            "goal": "Declarar una preferencia de ubicacion o disposicion a trasladarte",
+        },
+        "pt": {
+            "title": "Esclarecer as suas preferencias de localizacao / mudanca",
+            "explanation": ("Esta vaga esta associada a uma localizacao especifica e o seu perfil "
+                            "ainda nao indica uma preferencia de localizacao nem disponibilidade "
+                            "para mudanca, pelo que o sistema nao consegue evidenciar uma "
+                            "correspondencia geografica em qualquer sentido."),
+            "recommended_actions": [
+                "Defina uma localizacao preferida ou um tempo maximo de deslocacao no seu perfil",
+                "Indique se esta disponivel para se mudar dentro do pais de destino",
+                "Indique se aceitaria funcoes totalmente remotas, se aplicavel",
+            ],
+            "estimated_timeline": "Alguns minutos (atualizacao do perfil)",
+            "estimated_cost": "Gratuito",
+            "goal": "Declarar uma preferencia de localizacao ou disponibilidade para mudanca",
+        },
+    },
+    "mandatory_requirement": {
+        "en": {
+            "title": "Obtain the required professional licence/registration",
+            "explanation": ("This occupation is legally regulated in the target country. "
+                            "Without the required professional licence or registration you "
+                            "are not currently eligible for this vacancy - this is a "
+                            "mandatory requirement, not a ranking factor, so it is reported "
+                            "separately from your score."),
+            "recommended_actions": [
+                "Identify the competent regulatory body for this profession",
+                "Submit your qualification for professional registration/licensing",
+                "Track the process status and update your profile once completed",
+            ],
+            "estimated_timeline": "Varies by profession and country (often 2-12 months)",
+            "estimated_cost": "Varies by regulatory body",
+            "goal": "Obtain the mandatory professional licence/registration",
+        },
+        "es": {
+            "title": "Obtener la licencia/colegiacion profesional exigida",
+            "explanation": ("Esta ocupacion esta legalmente regulada en el pais de destino. "
+                            "Sin la licencia o colegiacion profesional exigida no eres "
+                            "actualmente elegible para esta vacante - es un requisito "
+                            "obligatorio, no un factor de puntuacion, por lo que se informa "
+                            "por separado de tu puntuacion."),
+            "recommended_actions": [
+                "Identifica el organismo regulador competente para esta profesion",
+                "Presenta tu titulacion para la colegiacion/licencia profesional",
+                "Haz seguimiento del proceso y actualiza tu perfil al completarlo",
+            ],
+            "estimated_timeline": "Varia segun la profesion y el pais (a menudo 2-12 meses)",
+            "estimated_cost": "Varia segun el organismo regulador",
+            "goal": "Obtener la licencia/colegiacion profesional obligatoria",
+        },
+        "pt": {
+            "title": "Obter a licenca/inscricao profissional exigida",
+            "explanation": ("Esta ocupacao e legalmente regulamentada no pais de destino. "
+                            "Sem a licenca ou inscricao profissional exigida, nao esta "
+                            "atualmente elegivel para esta vaga - trata-se de um requisito "
+                            "obrigatorio, nao de um fator de pontuacao, pelo que e reportado "
+                            "separadamente da sua pontuacao."),
+            "recommended_actions": [
+                "Identifique o organismo regulador competente para esta profissao",
+                "Submeta a sua qualificacao para inscricao/licenciamento profissional",
+                "Acompanhe o processo e atualize o seu perfil quando for concluido",
+            ],
+            "estimated_timeline": "Varia consoante a profissao e o pais (muitas vezes 2-12 meses)",
+            "estimated_cost": "Varia consoante o organismo regulador",
+            "goal": "Obter a licenca/inscricao profissional obrigatoria",
+        },
+    },
     "skills": {
         "en": {
             "title": "Close the required skill gaps",

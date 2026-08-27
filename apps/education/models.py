@@ -1,4 +1,5 @@
 from django.db import models
+from apps.locations.models import Location
 
 
 TRUE_VALUES = {"1", "SIM", "S", "TRUE"}
@@ -11,14 +12,16 @@ def to_bool(val):
 
 
 class Municipality(models.Model):
-    """
-    Shared city/state lookup used by every other table in this app, instead
-    of repeating city/state/city_code on each one.
-    """
     ibge_code = models.CharField(max_length=20, unique=True, db_index=True)
     name = models.CharField(max_length=200)
     state = models.CharField(max_length=2, db_index=True)
     region = models.CharField(max_length=100, blank=True)
+    location = models.ForeignKey(
+        Location, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="+",
+        help_text="Optional cross-reference to the oit-synced Location tree. "
+                "ibge_code stays the source of truth for census joins.",
+    )
 
     class Meta:
         db_table = "education_municipality"
@@ -40,40 +43,29 @@ class Municipality(models.Model):
 
 
 class Institution(models.Model):
-    """
-    Higher education institutions (Universities/Colleges).
-    Source: INEP Censo da Educação Superior (official government dataset).
-    """
     inep_code = models.CharField(max_length=20, unique=True, db_index=True)
     name = models.CharField(max_length=500, db_index=True)
     acronym = models.CharField(max_length=50, blank=True)
     maintainer_name = models.CharField(max_length=500, blank=True)
     maintainer_code = models.CharField(max_length=20, blank=True)
-
     academic_org_type = models.CharField(max_length=100, blank=True)
     network_type = models.CharField(max_length=50, blank=True)
     admin_category = models.CharField(max_length=100, blank=True)
     is_community = models.BooleanField(default=False)
     is_confessional = models.BooleanField(default=False)
-
     address = models.CharField(max_length=500, blank=True)
     address_number = models.CharField(max_length=50, blank=True)
     neighborhood = models.CharField(max_length=200, blank=True)
     zip_code = models.CharField(max_length=20, blank=True)
-
     municipality = models.ForeignKey(
         Municipality, on_delete=models.PROTECT, related_name="institutions"
     )
-
-    # Enrichment fields — populated later by controlled crawling, NOT from
-    # the government dataset itself.
     website = models.URLField(blank=True)
     email = models.EmailField(blank=True)
     phone = models.CharField(max_length=50, blank=True)
     career_center_url = models.URLField(blank=True)
     international_office_url = models.URLField(blank=True)
     enrichment_last_checked = models.DateTimeField(null=True, blank=True)
-
     census_year = models.IntegerField(default=2024)
     source = models.CharField(max_length=50, default="INEP_CENSO_SUPERIOR")
     created_at = models.DateTimeField(auto_now_add=True)
@@ -88,30 +80,19 @@ class Institution(models.Model):
 
 
 class Course(models.Model):
-    """
-    Higher-education courses tied to an Institution.
-    Source: INEP Censo da Educação Superior — cadastro de cursos.
-    """
     institution = models.ForeignKey(Institution, on_delete=models.CASCADE, related_name="courses")
     inep_course_code = models.CharField(max_length=20, db_index=True)
     name = models.CharField(max_length=500, db_index=True)
-
     cine_area_general = models.CharField(max_length=300, blank=True)
     cine_area_specific = models.CharField(max_length=300, blank=True)
     cine_area_detailed = models.CharField(max_length=300, blank=True)
-
     degree_type = models.CharField(max_length=100, blank=True)
     academic_level = models.CharField(max_length=100, blank=True)
     teaching_modality = models.CharField(max_length=100, blank=True)
     is_free = models.BooleanField(default=False)
-
-    # Only set when the course's city differs from the institution's own
-    # (satellite campus). Left null when it matches — avoids duplicating
-    # the institution's own municipality on every course row.
     municipality = models.ForeignKey(
         Municipality, on_delete=models.SET_NULL, null=True, blank=True, related_name="courses"
     )
-
     census_year = models.IntegerField(default=2024)
     source = models.CharField(max_length=50, default="INEP_CENSO_SUPERIOR")
 
@@ -124,38 +105,28 @@ class Course(models.Model):
 
 
 class School(models.Model):
-    """
-    K-12 / Basic education schools.
-    Source: INEP Censo Escolar (official government dataset).
-    """
     inep_code = models.CharField(max_length=20, unique=True, db_index=True)
     name = models.CharField(max_length=500, db_index=True)
-
     dependency_type = models.CharField(max_length=100, blank=True)
     private_category = models.CharField(max_length=100, blank=True)
     location_type = models.CharField(max_length=100, blank=True)
     operating_status = models.CharField(max_length=100, blank=True)
-
     address = models.CharField(max_length=500, blank=True)
     neighborhood = models.CharField(max_length=200, blank=True)
     zip_code = models.CharField(max_length=20, blank=True)
     latitude = models.CharField(max_length=50, blank=True)
     longitude = models.CharField(max_length=50, blank=True)
-
     municipality = models.ForeignKey(
         Municipality, on_delete=models.PROTECT, related_name="schools"
     )
-
     is_vocational = models.BooleanField(default=False)
     run_by_institution = models.ForeignKey(
         Institution, on_delete=models.SET_NULL, null=True, blank=True, related_name="run_schools"
     )
-
     website = models.URLField(blank=True)
     email = models.EmailField(blank=True)
     phone = models.CharField(max_length=50, blank=True)
     enrichment_last_checked = models.DateTimeField(null=True, blank=True)
-
     census_year = models.IntegerField(default=2025)
     source = models.CharField(max_length=50, default="INEP_CENSO_ESCOLAR")
     created_at = models.DateTimeField(auto_now_add=True)

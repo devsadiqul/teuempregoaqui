@@ -110,12 +110,25 @@ def _resolve_documentation(country, ctx, lang):
     return _card("documentation", lang, {}, DOC_INSTITUTION[lang], "")
 
 
+def _resolve_mandatory_requirement(country, ctx, lang):
+    pair = DEGREE_RECOGNITION.get(country)
+    inst, url = pair if pair else (FALLBACK_INSTITUTION["degree_recognition"][lang], "")
+    return _card("mandatory_requirement", lang, {}, inst, url,
+                 extra={"requirement": ctx.get("requirement")})
+
+
+def _resolve_location(country, ctx, lang):
+    return _card("location", lang, {}, "", "", extra={"vacancy_location": ctx.get("vacancy_location")})
+
+
 _RESOLVERS = {
     "language": _resolve_language,
     "immigration": _resolve_immigration,
     "degree_recognition": _resolve_degree_recognition,
     "skills": _resolve_skills,
     "documentation": _resolve_documentation,
+    "mandatory_requirement": _resolve_mandatory_requirement,
+    "location": _resolve_location,
 }
 
 VALID_GAP_TYPES = tuple(_RESOLVERS)
@@ -130,7 +143,10 @@ def resolve(gap_type, target_country, context=None, current_score=None,
         raise ValueError(f"Unknown gap_type '{gap_type}'. "
                          f"Expected one of {VALID_GAP_TYPES}.")
     card = resolver(target_country, context, lang)
-    stars = _priority(gain)
+    # A mandatory eligibility requirement is always top priority, regardless
+    # of its (necessarily 0) score gain - failing it blocks the vacancy
+    # outright rather than merely lowering a ranking score.
+    stars = 5 if gap_type == "mandatory_requirement" else _priority(gain)
     card.update({
         "gap_type": gap_type,
         "target_country": target_country,

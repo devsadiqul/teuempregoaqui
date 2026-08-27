@@ -419,7 +419,7 @@ def official_source_names(request):
     method='get',
     manual_parameters=[
         openapi.Parameter('lang', openapi.IN_QUERY, description="en | es | pt (description language; default en)", type=openapi.TYPE_STRING),
-        openapi.Parameter('country', openapi.IN_QUERY, description="Filter by country", type=openapi.TYPE_STRING),
+        openapi.Parameter('country', openapi.IN_QUERY, description="Filter by ISO country code, e.g. PT, ES, FR", type=openapi.TYPE_STRING),
     ],
     responses={200: OfficialSourceSerializer(many=True)},
     tags=['Official Source']
@@ -433,9 +433,10 @@ def get_official_source_list(request):
         sources = OfficialSource.objects.filter(is_active=True)
     country = request.query_params.get('country')
     if country:
-        sources = sources.filter(country__icontains=country)
+        sources = sources.filter(country__country_code__iexact=country)
     serializer = OfficialSourceSerializer(sources, many=True, context={'request': request})
     return Response(serializer.data)
+
 
 @swagger_auto_schema(
     method='post',

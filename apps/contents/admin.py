@@ -49,8 +49,9 @@ class ArticleAdmin(admin.ModelAdmin):
 class OfficialSourceAdmin(admin.ModelAdmin):
     list_display = ('name', 'country', 'order', 'is_active', 'created_at')
     list_editable = ('order', 'is_active')
-    search_fields = ('name', 'country')
-    list_filter = ('country', 'is_active')
+    search_fields = ('name', 'country__name')
+    list_filter = ('is_active',)
+    autocomplete_fields = ('country',)
     ordering = ['order', 'id']
 
 

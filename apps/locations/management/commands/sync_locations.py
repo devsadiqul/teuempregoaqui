@@ -15,7 +15,7 @@ class Command(BaseCommand):
         if not base_url:
             raise CommandError("OIT_BACKBONE_URL is not configured in settings")
 
-        url = f"{base_url}/api/locations/export/"
+        url = f"{base_url}/locations/export/"
         params = {"country": options["country"]} if options["country"] else {}
         response = requests.get(url, params=params, timeout=30)
         response.raise_for_status()

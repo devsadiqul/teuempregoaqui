@@ -2,6 +2,7 @@ from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
 from django.db import transaction
 from apps.contents.models import OfficialSource
+from apps.locations.models import Location
 
 
 _PNG_1PX = bytes.fromhex(
@@ -70,8 +71,11 @@ class Command(BaseCommand):
             if OfficialSource.objects.filter(name=src["name"]).exists():
                 skipped += 1
                 continue
+            country_location = Location.objects.filter(
+                location_type="country", name__iexact=src["country"]
+            ).first()
             obj = OfficialSource(
-                name=src["name"], url=src["url"], country=src["country"],
+                name=src["name"], url=src["url"], country=country_location,
                 order=src["order"], is_active=True,
                 description=src["description"],
                 description_es=src["description_es"],

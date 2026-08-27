@@ -42,7 +42,7 @@ def match_candidate_to_offer(candidate_input: scoring.CandidateInput, clean: dic
                              lang="en", required_language=None,
                              required_language_level=None, local_language="required") -> dict:
     esco_uuid = resolve_esco_uuid(clean.get("appellation_code"),
-                                  clean.get("appellation_label"))
+                                clean.get("appellation_label"))
     occ = EscoOccupation.objects.filter(pk=esco_uuid).first() if esco_uuid else None
     skill_map = candidate_services.essential_skill_map(occ, lang) if occ else {}
     vac = scoring.VacancyInput(
@@ -50,6 +50,8 @@ def match_candidate_to_offer(candidate_input: scoring.CandidateInput, clean: dic
         required_language=required_language or ("French" if local_language != "none" else None),
         required_language_level=required_language_level,
         local_language=local_language,
+        regulated=bool(getattr(occ, "regulated", False)),
+        location=clean.get("location") or None,
     )
     result = scoring.score(candidate_input, vac)
     candidate_services._relabel_skills(result, skill_map)

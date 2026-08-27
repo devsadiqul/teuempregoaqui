@@ -2,6 +2,7 @@ import uuid
 from django.db import models
 from django.utils.text import slugify
 from django.core.validators import MinValueValidator, MaxValueValidator
+from apps.locations.models import Location
 
 
 # Create your models here.
@@ -209,7 +210,11 @@ class OfficialSource(models.Model):
     description_pt = models.TextField(blank=True, null=True)
     url = models.URLField()
     icon = models.ImageField(upload_to='official_sources/icons/')
-    country = models.CharField(max_length=100, help_text="e.g. Portugal, European Union, Spain")
+    country = models.ForeignKey(
+        Location, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="+", limit_choices_to={"location_type": "country"},
+        help_text="Leave blank for sources that aren't country-specific (e.g. EU-wide).",
+    )
     order = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -7,7 +7,7 @@ load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ── Core Settings ───────────────────────────────────────────────────────────────
+# Core Settings
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-gme_)0vce#j*_+@$wkvkk5^_!_$sgz6uelja9vgnjjknuntwb#')
 
 if not SECRET_KEY:
@@ -17,7 +17,7 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
-# ── Apps ──────────────────────────────────────────────────────────────────────
+# Apps
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -37,10 +37,10 @@ INSTALLED_APPS = [
     'apps.candidate',
     'apps.francetravail',
     'apps.education',
+    'apps.locations',
 ]
 
-# ── Middleware ────────────────────────────────────────────────────────────────
-
+# Middleware
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -71,7 +71,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "teuempregoaqui.wsgi.application"
 
-# ── Database ──────────────────────────────────────────────────────────────────
+# Database
 if not DEBUG:
     DATABASES = {
         'default': {
@@ -93,7 +93,7 @@ else:
         }
     }
 
-# ── Password Validation ───────────────────────────────────────────────────────
+# Password Validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -101,7 +101,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# ── Internationalisation ──────────────────────────────────────────────────────
+# Internationalisation
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
@@ -109,14 +109,14 @@ USE_TZ = True
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ── Static & Media ────────────────────────────────────────────────────────────
+# Static & Media
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# ── CORS ──────────────────────────────────────────────────────────────────────
+# CORS
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
 else:
@@ -124,7 +124,7 @@ else:
     CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
     CORS_ALLOW_CREDENTIALS = True
 
-# ── Security Headers (production only) ───────────────────────────────────────
+# Security Headers (production only)
 if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
@@ -137,7 +137,7 @@ if not DEBUG:
     X_FRAME_OPTIONS = 'DENY'
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# ── REST Framework ────────────────────────────────────────────────────────────
+# REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'apps.authentication.RemoteJWTAuthentication',
@@ -147,7 +147,7 @@ REST_FRAMEWORK = {
     ),
 }
 
-# ── Simple JWT ────────────────────────────────────────────────────────────────
+# Simple JWT
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME" : timedelta(days=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=60),
@@ -159,7 +159,7 @@ SIMPLE_JWT = {
     "USER_ID_FIELD" : "id",
 }
 
-# ── Swagger ───────────────────────────────────────────────────────────────────
+# Swagger
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
         'Bearer': {
@@ -173,7 +173,7 @@ SWAGGER_SETTINGS = {
     'SHOW_REQUEST_HEADERS': True,
 }
 
-# ── Email ─────────────────────────────────────────────────────────────────────
+# Email
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 else:
@@ -186,7 +186,7 @@ else:
     DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', '')
 
 
-# ── External APIs ─────────────────────────────────────────────────────────────
+# External APIs
 DEEPL_API_KEY = os.environ.get("DEEPL_API_KEY", "3ae58949-7c2d-4788-97a6-80a75bee60f2:fx")
 DEEPL_API_URL = os.environ.get("DEEPL_API_URL", "https://api-free.deepl.com/v2/translate")
 
@@ -198,6 +198,8 @@ FRANCE_TRAVAIL = {
     "BASE_URL": "https://api.francetravail.io",
     "SEARCH_PATH": "/partenaire/offresdemploi/v2/offres/search",
     "SCOPE": "api_offresdemploiv2 o2dsoffre",
-    "CLIENT_ID": os.environ.get("FT_CLIENT_ID", ""),
-    "CLIENT_SECRET": os.environ.get("FT_CLIENT_SECRET", ""),
+    "CLIENT_ID": os.getenv("FT_CLIENT_ID", ""),
+    "CLIENT_SECRET": os.getenv("FT_CLIENT_SECRET", ""),
 }
+
+OIT_BACKBONE_URL = os.getenv("OIT_BACKBONE_URL", "http://127.0.0.1:8001/api/v1")

@@ -4,8 +4,8 @@ from apps.education.models import Institution
 from . import resolutions
 from .models import (
     CandidateProfile, Education, WorkExperience,
-    CandidateLanguage, CandidateCertification, CandidateSkill,
-    PracticeCredential,
+    CandidateLanguage, CandidateLanguageCertificate, CandidateCertification,
+    CandidateSkill, PracticeCredential,
 )
 
 CEFR = ["A1", "A2", "B1", "B2", "C1", "C2", "native"]
@@ -30,10 +30,26 @@ class WorkExperienceSerializer(serializers.ModelSerializer):
         exclude = ("profile",)
 
 
+class CandidateLanguageCertificateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CandidateLanguageCertificate
+        exclude = ("candidate_language",)
+
+
 class CandidateLanguageSerializer(serializers.ModelSerializer):
+    certificates = CandidateLanguageCertificateSerializer(many=True, required=False)
+    cefr_equivalent = serializers.CharField(source="level", read_only=True)
+
     class Meta:
         model = CandidateLanguage
         exclude = ("profile",)
+
+    def create(self, validated_data):
+        certs = validated_data.pop("certificates", [])
+        instance = super().create(validated_data)
+        for cert in certs:
+            CandidateLanguageCertificate.objects.create(candidate_language=instance, **cert)
+        return instance
 
 
 class CandidateCertificationSerializer(serializers.ModelSerializer):
@@ -92,13 +108,24 @@ class CandidateProfileSerializer(serializers.ModelSerializer):
                 {"consent_given": "Explicit consent is required for Personal Account Mode."})
         return attrs
 
+    @staticmethod
+    def _create_children(profile, key, rows):
+        _, model = NESTED[key]
+        if key == "languages":
+            for row in rows:
+                certs = row.pop("certificates", [])
+                lang = model.objects.create(profile=profile, **row)
+                for cert in certs:
+                    CandidateLanguageCertificate.objects.create(candidate_language=lang, **cert)
+        else:
+            model.objects.bulk_create([model(profile=profile, **row) for row in rows])
+
     @transaction.atomic
     def create(self, validated_data):
         children = {k: validated_data.pop(k, []) for k in NESTED}
         profile = CandidateProfile.objects.create(**validated_data)
         for key, rows in children.items():
-            _, model = NESTED[key]
-            model.objects.bulk_create([model(profile=profile, **row) for row in rows])
+            self._create_children(profile, key, rows)
         return profile
 
     @transaction.atomic
@@ -112,7 +139,7 @@ class CandidateProfileSerializer(serializers.ModelSerializer):
                 continue
             _, model = NESTED[key]
             getattr(instance, key).all().delete()
-            model.objects.bulk_create([model(profile=instance, **row) for row in rows])
+            self._create_children(instance, key, rows)
         return instance
 
 
