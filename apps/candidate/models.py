@@ -52,6 +52,25 @@ class WillingnessLevel(models.TextChoices):
     MAYBE = "maybe", "Maybe"
 
 
+class Nationality(models.Model):
+    location = models.OneToOneField(
+        Location, on_delete=models.CASCADE, related_name="nationality",
+        limit_choices_to={"location_type": "country"},
+    )
+    demonym = models.CharField(max_length=100)
+    demonym_es = models.CharField(max_length=100, blank=True)
+    demonym_pt = models.CharField(max_length=100, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "candidate_nationality"
+        verbose_name_plural = "Nationalities"
+
+    def __str__(self):
+        return f"{self.location.name} -> {self.demonym}"
+
+
 class CandidateProfile(models.Model):
     class Mode(models.TextChoices):
         PRIVATE = "private", "Private Mode"
@@ -84,8 +103,6 @@ class CandidateProfile(models.Model):
                    "Privacy Notice / Terms acceptance (client feedback: do not combine "
                    "everything into one generic acceptance).")
     expires_at = models.DateTimeField(null=True, blank=True)
-    # Data minimisation: identity fields belong primarily to the OIT account,
-    # not to the employment assessment itself, so they are optional here.
     full_name = models.CharField(
         max_length=255, blank=True,
         help_text="Optional here - primarily belongs to the OIT user account.")
@@ -94,8 +111,8 @@ class CandidateProfile(models.Model):
         related_name="+", limit_choices_to={"location_type": "country"},
     )
     current_nationality = models.ForeignKey(
-        Location, on_delete=models.SET_NULL, null=True, blank=True,
-        related_name="+", limit_choices_to={"location_type": "country"},
+        Nationality, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name="profiles",
     )
     country_of_residence = models.ForeignKey(
         Location, on_delete=models.SET_NULL, null=True, blank=True,

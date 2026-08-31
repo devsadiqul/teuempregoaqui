@@ -5,7 +5,7 @@ from . import resolutions
 from .models import (
     CandidateProfile, Education, WorkExperience,
     CandidateLanguage, CandidateLanguageCertificate, CandidateCertification,
-    CandidateSkill, PracticeCredential,
+    CandidateSkill, PracticeCredential, Nationality
 )
 
 CEFR = ["A1", "A2", "B1", "B2", "C1", "C2", "native"]
@@ -75,6 +75,30 @@ class PracticeCredentialSerializer(serializers.ModelSerializer):
     class Meta:
         model = PracticeCredential
         exclude = ("profile",)
+        
+        
+class NationalitySerializer(serializers.ModelSerializer):
+    country_name = serializers.CharField(source="location.name", read_only=True)
+    demonym = serializers.SerializerMethodField()
+ 
+    class Meta:
+        model = Nationality
+        fields = ("id", "country_name", "demonym", "demonym_es", "demonym_pt")
+ 
+    def get_demonym(self, obj):
+        lang = self.context.get("lang")
+        if lang == "es":
+            return obj.demonym_es or obj.demonym
+        if lang == "pt":
+            return obj.demonym_pt or obj.demonym
+        return obj.demonym
+ 
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        if self.context.get("lang"):
+            data.pop("demonym_es", None)
+            data.pop("demonym_pt", None)
+        return data
 
 
 NESTED = {

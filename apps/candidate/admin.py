@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (CandidateProfile, Education, WorkExperience,
                      CandidateLanguage, CandidateCertification, CandidateSkill,
-                     PracticeCredential)
+                     PracticeCredential, Nationality)
 
 
 @admin.register(CandidateProfile)
@@ -27,3 +27,10 @@ admin.site.register(CandidateSkill)
 @admin.register(Education)
 class EducationAdmin(admin.ModelAdmin):
     autocomplete_fields = ("institution", "country_of_qualification")
+
+
+@admin.register(Nationality)
+class NationalityAdmin(admin.ModelAdmin):
+    list_display = ("location", "demonym", "demonym_es", "demonym_pt")
+    search_fields = ("location__name", "demonym", "demonym_es", "demonym_pt")
+    autocomplete_fields = ("location",)
