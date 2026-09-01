@@ -1,9 +1,10 @@
 from django.contrib import admin
+from unfold.admin import ModelAdmin
 from .models import Location
 
 
 @admin.register(Location)
-class LocationAdmin(admin.ModelAdmin):
+class LocationAdmin(ModelAdmin):
     list_display = ["name", "location_type", "country_code", "parent", "depth", "is_active"]
     list_filter = ["country_code", "location_type", "is_active"]
     search_fields = ["name", "local_name"]

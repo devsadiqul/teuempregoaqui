@@ -121,6 +121,7 @@ class HowToSolveReportSchema(serializers.Serializer):
 class RecommendedJobSchema(serializers.Serializer):
     source_id = serializers.CharField()
     title = serializers.CharField()
+    description = serializers.CharField()
     company_name = serializers.CharField()
     location = serializers.CharField()
     rome_code = serializers.CharField()

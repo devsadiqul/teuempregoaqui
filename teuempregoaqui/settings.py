@@ -19,6 +19,7 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1,localhost').split(',')
 
 # Apps
 INSTALLED_APPS = [
+    'unfold',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -203,3 +204,21 @@ FRANCE_TRAVAIL = {
 }
 
 OIT_BACKBONE_URL = os.getenv("OIT_BACKBONE_URL", "http://127.0.0.1:8001/api/v1")
+
+
+UNFOLD = {
+    "SITE_TITLE": "TeuEmpregoAqui Admin",
+    "SITE_HEADER": "TeuEmpregoAqui",
+    "SITE_URL": "/",
+    "SHOW_HISTORY": True,
+    "SHOW_VIEW_ON_SITE": True,
+    "COLORS": {
+        "primary": {
+            "500": "37 99 235",
+        },
+    },
+    "SIDEBAR": {
+        "show_search": True,
+        "show_all_applications": True,
+    },
+}
