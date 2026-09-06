@@ -78,9 +78,42 @@ class BlocksSchema(serializers.Serializer):
     recognition = serializers.FloatField()
 
 
+class StrengthWeaknessItemSchema(serializers.Serializer):
+    """One dimension, translated from raw score/status into candidate-facing copy."""
+    dimension = serializers.CharField()
+    label = serializers.CharField()
+    score = serializers.FloatField()
+    weight = serializers.FloatField()
+    status = serializers.CharField()
+    explanation = serializers.CharField()
+    current_overall_score = serializers.FloatField()
+    potential_overall_score = serializers.FloatField(
+        help_text="Overall score if this dimension alone reached its maximum, all else unchanged.")
+    points_gain = serializers.FloatField(help_text="potential_overall_score - current_overall_score.")
+    how_to_improve = serializers.CharField(help_text="Concrete next action for this dimension.")
+
+
+class StrengthWeaknessGroupSchema(serializers.Serializer):
+    strengths = StrengthWeaknessItemSchema(many=True)
+    developing = StrengthWeaknessItemSchema(many=True)
+    weaknesses = StrengthWeaknessItemSchema(many=True)
+
+
+class StrengthsAndWeaknessesSchema(serializers.Serializer):
+    """Candidate-facing explanation of job_match_score/employability_index,
+    localized per the ``lang`` query param. See apps.candidate.strengths."""
+    job_fit = StrengthWeaknessGroupSchema()
+    general_employability = StrengthWeaknessGroupSchema()
+    summary = serializers.CharField()
+    top_opportunity = serializers.CharField(
+        allow_null=True,
+        help_text="The single highest-impact gap to close across both groups, or null if there is none.")
+
+
 class MatchResponseSchema(serializers.Serializer):
     job_match_score = JobMatchScoreSchema()
     employability_index = EmployabilityIndexSchema()
+    strengths_and_weaknesses = StrengthsAndWeaknessesSchema()
     # Legacy-compatible fields (deprecated - use job_match_score instead)
     blocks = BlocksSchema()
     total = serializers.FloatField()

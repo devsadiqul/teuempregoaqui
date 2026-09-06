@@ -1,6 +1,6 @@
 from datetime import date
 from apps.crosswalk.models import EscoOccupation, OccupationSkill, RomeEscoMapping
-from . import scoring, recognition
+from . import scoring, recognition, strengths
 from .models import CandidateProfile
 
 RECOGNITION_MAP = {
@@ -151,6 +151,14 @@ def run_match(profile, occupation, data, lang="en"):
         "essential_skill_count": len(essential_map),
         "regulated": v.regulated,
         "recognition_requirement": recognition_info}
+
+    from apps.candidate.resolution_text import LANGUAGE_NAMES
+    lang_display = LANGUAGE_NAMES.get((v.required_language or "").lower(), {}).get(lang, v.required_language)
+    result["strengths_and_weaknesses"] = strengths.build(
+        result["job_match_score"], result["employability_index"],
+        matched_skills=result["matched_skills"], missing_skills=result["missing_skills"],
+        required_language=lang_display, required_language_level=v.required_language_level,
+        lang=lang)
     return result
 
 

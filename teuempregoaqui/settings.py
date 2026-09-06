@@ -203,7 +203,7 @@ FRANCE_TRAVAIL = {
     "CLIENT_SECRET": os.getenv("FT_CLIENT_SECRET", ""),
 }
 
-OIT_BACKBONE_URL = os.getenv("OIT_BACKBONE_URL", "http://127.0.0.1:8001/api/v1")
+OIT_BACKBONE_URL = os.getenv("OIT_BACKBONE_URL", "http://127.0.0.1:8000/api/v1")
 
 
 UNFOLD = {
