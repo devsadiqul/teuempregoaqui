@@ -32,11 +32,15 @@ LANGUAGE_INSTITUTES = {
     "german": ("Goethe-Institut", "https://www.goethe.de"),
     "italian": ("Societa Dante Alighieri", "https://ladante.it"),
 }
+LANGUAGE_TESTERS_FALLBACK = ("ALTE - Association of Language Testers in Europe", "https://www.alte.org")
+
+UNSPECIFIED_LANGUAGE = {"en": "the required language", "es": "el idioma requerido", "pt": "o idioma exigido"}
 
 COUNTRY_LANGUAGE = {"PT": "portuguese", "ES": "spanish", "FR": "french",
                     "DE": "german", "IT": "italian"}
 
 SKILLS_PORTAL = ("Europass / EU course catalogue", "https://europass.europa.eu")
+LOCATION_PORTAL = ("EURES - European Job Mobility Portal", "https://eures.europa.eu")
 
 
 def _priority(gain: float) -> int:
@@ -78,8 +82,8 @@ def _card(gap_type, lang, fmt, inst, url, extra=None):
 def _resolve_language(country, ctx, lang):
     key = (ctx.get("language") or COUNTRY_LANGUAGE.get(country, "")).lower()
     pair = LANGUAGE_INSTITUTES.get(key)
-    inst, url = pair if pair else (FALLBACK_INSTITUTION["language"][lang], "")
-    name = LANGUAGE_NAMES.get(key, {}).get(lang, key.title() or "")
+    inst, url = pair if pair else LANGUAGE_TESTERS_FALLBACK
+    name = LANGUAGE_NAMES.get(key, {}).get(lang) or (key.title() if key else UNSPECIFIED_LANGUAGE[lang])
     fmt = {"language": name,
            "cur": ctx.get("current_level") or NONE_LABEL[lang],
            "target": ctx.get("target_level", "B2")}
@@ -88,13 +92,15 @@ def _resolve_language(country, ctx, lang):
 
 def _resolve_immigration(country, ctx, lang):
     pair = IMMIGRATION.get(country)
-    inst, url = pair if pair else (FALLBACK_INSTITUTION["immigration"][lang], "")
+    inst, url = pair if pair else (
+        FALLBACK_INSTITUTION["immigration"][lang], "https://immigration-portal.ec.europa.eu")
     return _card("immigration", lang, {}, inst, url)
 
 
 def _resolve_degree_recognition(country, ctx, lang):
     pair = DEGREE_RECOGNITION.get(country)
-    inst, url = pair if pair else (FALLBACK_INSTITUTION["degree_recognition"][lang], "")
+    inst, url = pair if pair else (
+        FALLBACK_INSTITUTION["degree_recognition"][lang], "https://www.enic-naric.net")
     return _card("degree_recognition", lang, {}, inst, url)
 
 
@@ -107,18 +113,22 @@ def _resolve_skills(country, ctx, lang):
 
 
 def _resolve_documentation(country, ctx, lang):
-    return _card("documentation", lang, {}, DOC_INSTITUTION[lang], "")
+    return _card("documentation", lang, {}, DOC_INSTITUTION[lang],
+                 "https://www.hcch.net/en/instruments/conventions/authorities1/?cid=41")
 
 
 def _resolve_mandatory_requirement(country, ctx, lang):
     pair = DEGREE_RECOGNITION.get(country)
-    inst, url = pair if pair else (FALLBACK_INSTITUTION["degree_recognition"][lang], "")
+    inst, url = pair if pair else (
+        FALLBACK_INSTITUTION["degree_recognition"][lang], "https://www.enic-naric.net")
     return _card("mandatory_requirement", lang, {}, inst, url,
-                 extra={"requirement": ctx.get("requirement")})
+                 extra={"requirement": ctx.get("requirement") or NONE_LABEL[lang]})
 
 
 def _resolve_location(country, ctx, lang):
-    return _card("location", lang, {}, "", "", extra={"vacancy_location": ctx.get("vacancy_location")})
+    inst, url = LOCATION_PORTAL
+    return _card("location", lang, {}, inst, url,
+                 extra={"vacancy_location": ctx.get("vacancy_location") or NONE_LABEL[lang]})
 
 
 _RESOLVERS = {
@@ -143,9 +153,6 @@ def resolve(gap_type, target_country, context=None, current_score=None,
         raise ValueError(f"Unknown gap_type '{gap_type}'. "
                          f"Expected one of {VALID_GAP_TYPES}.")
     card = resolver(target_country, context, lang)
-    # A mandatory eligibility requirement is always top priority, regardless
-    # of its (necessarily 0) score gain - failing it blocks the vacancy
-    # outright rather than merely lowering a ranking score.
     stars = 5 if gap_type == "mandatory_requirement" else _priority(gain)
     card.update({
         "gap_type": gap_type,
